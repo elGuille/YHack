@@ -7,7 +7,7 @@ file = urllib.URLopener()
 for year in range(2009, 2018):
     for month in range(1, 12):
         name = "RS_" + str(year) + "-" + str(month).zfill(2) + ".bz2"
-        url = "https://files.pushshift.io/reddit/submissions/" + name
+        url = "https://files.comments.io/reddit/submissions/" + name
         
         try:
             file.retrieve(url, name)
