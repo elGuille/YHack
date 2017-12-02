@@ -14,7 +14,7 @@ def build_csv(keywords, filename):
 
     # Creates interest_over_time dataframe
     interest_over_time_df = pytrend.interest_over_time()
-    print(interst_over_time_df.describe())
+    print(interest_over_time_df.info())
     # Builds csv with filename "filename"
     interest_over_time_df.to_csv(filename, sep='\t')
 

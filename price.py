@@ -74,4 +74,4 @@ def gen_currency(currency):
 	data = query_all(currency)
 	data.to_csv(currency + '.csv')
 	
-gen_currency('btc')
+gen_currency('BTC')
