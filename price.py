@@ -72,6 +72,20 @@ def query_all(currency):
 
 def gen_currency(currency):
 	data = query_all(currency)
-	data.to_csv(currency + '.csv')
-	
-gen_currency('BTC')
+	data.to_csv('price_data/' + currency + '.csv')
+
+from cryptosAbreviationMap import crypto_map
+from parse_crypto import get_top
+top = get_top()
+map = crypto_map()
+for coin in top:
+	ticker = map[coin]
+	print(coin, ticker)
+	try:
+		gen_currency(ticker)
+	except:
+		print(coin + 'failed')
+
+
+# gen_currency('BTC')
+# crypto_api()

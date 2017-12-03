@@ -1,10 +1,13 @@
 import pandas as pd
 import requests
 import json
+import re
+import sys
 
 import pprint
 
-from parse_crypto import get_top
+def get_words(text):
+    return re.compile('\w+').findall(text)
 
 pp = pprint.PrettyPrinter(indent=2)
 
@@ -17,17 +20,23 @@ def read_file(filename):
 
     data = []
     for line in lines:
-        if len(line) == 0:
+        if line.isspace():
             continue
-        parsed = json.loads(line)
-        #pp.pprint(parsed)
-        data.append({x: y for x, y in parsed.items() if x in keep})
+        try:
+            parsed = json.loads(line)
+            #pp.pprint(parsed)
+            data.append({x: y for x, y in parsed.items() if x in keep})
+        except json.decoder.JSONDecodeError:
+            pass
+    print(str(len(data)) + ' lines read')
     return data
 
 def search_data(data, slist):
+    data_string = (data['title'] + " " + data['selftext']).lower()
+    words = get_words(data_string)
     matches = []
     for s in slist:
-        if s.lower() in data['title'].lower() or s.lower() in data['selftext'].lower():
+        if (len(s.split()) > 1 and s.lower() in data_string) or s.lower() in words:
             matches.append(s)
     return matches
 
@@ -40,20 +49,28 @@ def filter_data(data, slist):
             filtered.append(item)
     return filtered
 
+def get_top():
+    file = open('top-200-cryptos.txt')
+    data = file.read()
+    split = data.split('\n')
+    return split
+
 def filter_by_crypto(filename):
-    sample = read_file('sample.json')
+    sample = read_file(filename)
     cryptos = get_top()
     all_crypto = filter_data(sample, cryptos)
-    return al_crypto
+    return all_crypto
 
-sample = filter_by_crypto('sample.json')
-data = pd.DataFrame(sample)
+def filter_and_save(filename):
+    data = filter_by_crypto(filename)
+    if len(data) == 0:
+        print("No data")
+        return
+    df = pd.DataFrame(data)
+    df['time'] = pd.to_datetime(df['created_utc'], unit='s')
+    df.drop(['created_utc'], axis=1, inplace=True)
+    df.set_index('time', inplace=True)
+    df.to_csv(filename+'.csv')
 
-
-# data = []
-# for line in lines:
-#     print(line)
-#     line_data = json.loads(line)
-#     #data.append({x: y for x, y in line_data.items() if x in keep})
-# 
-# pp.pprint(data)
+if len(sys.argv) > 1:
+    filter_and_save(sys.argv[1])
